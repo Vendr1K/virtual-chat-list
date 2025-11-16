@@ -1,5 +1,3 @@
-import './App.css';
-
 import { ChatList } from '@/components/chat-list/ChatList';
 
 export const App = () => {
