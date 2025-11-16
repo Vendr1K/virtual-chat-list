@@ -1,3 +1,7 @@
-export const ChatMessage = () => {
-  return <div>ChatMessage</div>;
+import type { HtmlHTMLAttributes } from 'react';
+
+interface ChatMessageProps extends HtmlHTMLAttributes<HTMLDivElement> {}
+
+export const ChatMessage = ({ children }: ChatMessageProps) => {
+  return <div>{children}</div>;
 };

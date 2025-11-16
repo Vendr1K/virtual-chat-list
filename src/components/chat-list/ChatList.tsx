@@ -1,13 +1,13 @@
-import { ChatMessage } from '../chat-message/ChatMessage';
+import { ChatMessage } from '@/components';
 
 export const ChatList = () => {
   return (
-    <div>
+    <div className="w-full flex flex-col">
       ChatList
-      <ul>
-        {Array.from({ length: 10 }, (_, index) => (
+      <ul className="flex flex-col h-full w-full overflow-auto">
+        {Array.from({ length: 100 }, (_, index) => (
           <li key={index}>
-            <ChatMessage />
+            <ChatMessage>message {index}</ChatMessage>
           </li>
         ))}
       </ul>

@@ -1,9 +1,9 @@
-import { ChatList } from '@/components/chat-list/ChatList';
+import { ChatView } from '@/components';
 
 export const App = () => {
   return (
-    <>
-      <ChatList />
-    </>
+    <div className="max-w-5xl h-dvh mx-auto bg-zinc-800">
+      <ChatView />
+    </div>
   );
 };
