@@ -1,95 +1,25 @@
 import { mockMessages, mockMessagesSimpleHeigh } from '@/mock';
 import { ChatMessage } from '@/components';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { useSimpleSizeList } from '@/hooks';
 
 // virtualization settings
 const ITEM_HEIGHT = 90;
 const LIST_SIMPLE_HEIGHT = 600;
-const SCROLLING_DELAY = 200;
-const OVERSCAN = 3;
 
 export const ChatList = () => {
   const [listItems, setListItems] = useState(mockMessagesSimpleHeigh);
-
-  // virtualization states
-  const totalListHeight = listItems.length * ITEM_HEIGHT;
-
-  // TODO: dynamic list height calculation before rendering
-  // let listHeight = scrollElementRef.current?.clientHeight;
-
   const [withScrollingSkeleton, setWithScrollingSkeleton] = useState(true);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
 
   const scrollElementRef = useRef<HTMLDivElement>(null);
 
-  const virtualItems = useMemo(() => {
-    if (LIST_SIMPLE_HEIGHT === undefined) return [];
-
-    const rangeStart = scrollTop;
-    const rangeEnd = scrollTop + LIST_SIMPLE_HEIGHT;
-
-    let startIndex = Math.floor(rangeStart / ITEM_HEIGHT);
-    let endIndex = Math.ceil(rangeEnd / ITEM_HEIGHT);
-
-    startIndex = Math.max(0, startIndex - OVERSCAN);
-    endIndex = Math.min(listItems.length - 1, endIndex + OVERSCAN);
-
-    const virtualItems = [];
-
-    for (let index = startIndex; index <= endIndex; index++) {
-      virtualItems.push({
-        index,
-        offsetTop: index * ITEM_HEIGHT,
-      });
-    }
-
-    return virtualItems;
-  }, [scrollTop, LIST_SIMPLE_HEIGHT]);
-
-  useLayoutEffect(() => {
-    const scrollElement = scrollElementRef.current;
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      setScrollTop(scrollElement.scrollTop);
-    };
-
-    handleScroll();
-
-    scrollElement.addEventListener('scroll', handleScroll);
-    return () => {
-      scrollElement.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const scrollElement = scrollElementRef.current;
-    if (!scrollElement) return;
-
-    let timeoutId: number | null = 0;
-
-    const handleScroll = () => {
-      setIsScrolling(true);
-
-      if (typeof timeoutId === 'number') {
-        clearTimeout(timeoutId);
-      }
-
-      timeoutId = setTimeout(() => {
-        setIsScrolling(false);
-      }, SCROLLING_DELAY);
-    };
-
-    scrollElement.addEventListener('scroll', handleScroll);
-
-    return () => {
-      if (typeof timeoutId === 'number') {
-        clearTimeout(timeoutId);
-      }
-      scrollElement.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  const { virtualItems, totalHeight, isScrolling } = useSimpleSizeList({
+    itemHeight: ITEM_HEIGHT,
+    getScrollElement: useCallback(() => scrollElementRef.current, []),
+    itemsCount: listItems.length,
+    listHeight: LIST_SIMPLE_HEIGHT,
+    withScrollingSkeleton: withScrollingSkeleton,
+  });
 
   return (
     <div className="w-full flex flex-col">
@@ -113,7 +43,7 @@ export const ChatList = () => {
         style={{ height: LIST_SIMPLE_HEIGHT }}
         className="overflow-auto gap-2 py-4 relative"
       >
-        <div style={{ height: totalListHeight }} className="w-full">
+        <div style={{ height: totalHeight }} className="w-full">
           {virtualItems.map((virtualItem) => {
             const message = listItems[virtualItem.index];
 
